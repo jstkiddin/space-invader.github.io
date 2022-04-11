@@ -4,16 +4,88 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Space invader</title>
+  <title>Space invaders</title>
+  <link rel="stylesheet" href="css/screen.css">
+  <link rel="stylesheet" href="css/text_buttons.css">
+  <link rel="stylesheet" href="css/stars.css">
 </head>
 <body>
-  <div id="title">
-    Space invader
+
+  <section class="wrapper">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>
+    <div id="stars"></div>
+
+    <div id = 'back'>
+      <div id="title">
+        <span id="main">Space</span>
+        <br> 
+        <span id="add">invader</span>
+      </div>
+    </div>
+  </section>
+  
+  <div class="menu">
+    <div class="btn m" id="start">
+      <a href="game.html">START GAME</a>
+    </div>
+    <div class="btn m" id="contr">
+      <a href="#" id="open-popup">CONTROLS</a>
+    </div>
   </div>
-  <div id="buttons-wrapper">
-    <div class = "buttons">Start</div>
-    <div class = "buttons"></div>
-  </div>
+
+
+
+    <!-- CONTROLS pop-up window -->
+    <div class="popup">
+      <div class="popup-container">
+        <div class="popup-body">
+          <table>
+            <tr>
+              <td class = "key">
+                <span>W</span>
+                <!-- <span> &#8593; </span> -->
+              </td>
+              <td>Move up</td>
+            </tr>
+            <tr>
+              <td class = "key">
+                <span>S</span>
+                <!-- <span> &#8593; </span> -->
+              </td>
+              <td>Move down</td>
+            </tr>
+
+            <tr>
+              <td class = "key">
+                <span>A</span>
+                <!-- <span>&#8592;</span> -->
+              </td>
+              <td>Move Left</td>
+            </tr>
+
+            <tr>
+              <td class = "key">
+                <span >D</span>
+                <!-- <span>&#8594;</span> -->
+              </td>
+              <td>Move Right</td>
+            </tr>
+
+            <tr>
+              <td class = "key">
+                <span id="space">Space</span>
+                <!-- <span></span> -->
+              </td>
+              <td>Shoot an enemy</td>
+            </tr>
+          </table>
+          <div class="popup-close">&#10006</div>
+        </div>
+      </div>
+    </div>
+
   
 </body>
 </html>

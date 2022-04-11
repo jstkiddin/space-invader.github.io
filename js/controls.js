@@ -3,7 +3,8 @@ const c = canvas.getContext('2d')
 const shotSfx = document.querySelector('#shoot')
 
 const speed = 5
-
+const coefficient = 0.5
+const count_down =0
 /**
  * previous settings
  */
@@ -16,27 +17,94 @@ canvas.height = innerHeight
 
 // class GameObj{
 //   constructor(){
-//     this.velosity = {
-//       x:0,
-//       y:0
+//     this.position={
+//       x: canvas.width/2,
+//       y: canvas.height*0.86
 //     }
-//   }
+
 // }
 
 class Enemy {
-  constructor(){
-    this.position = {
-      x:200,
-      y:200
+  constructor({position}){
+    this.position={
+      x: position.x,
+      y: position.y
     }
-    this.velosity = {
+
+    const image = new Image()
+      image.src = './img/invader.png'
+      image.onload=()=>{
+        this.image = image
+
+        this.width = image.width*coefficient
+        this.height = image.height*coefficient
+      }
+
+
+    this.velosity ={
       x:0,
       y:0
     }
   }
 
+  draw(){
+    if(this.image){
+      c.drawImage(this.image, this.position.x,
+        this.position.y, 
+        this.width, this.height);
+    }
 
+  }
+
+  update({velosity}){
+    if(this.image){
+      this.position.x+=velosity.x
+      this.position.y+=velosity.y
+      this.draw()
+    }
+  }
 }
+
+class GroupInvader{
+  constructor(){
+    this.position ={
+      x:0,
+      y:0
+    }
+
+    this.velosity = {
+      x:0,
+      y:0
+    }
+
+    const rows = Math.floor(Math.random()*5+2)
+    const columns = Math.floor(Math.random()*10+4)
+
+    this.invaders =[]
+    for(let y=0; y<rows;y++){
+      for(let x=0;x<columns;x++){
+        this.invaders.push(
+          new Enemy({
+            position:{
+              x:x*50,
+              y:y*30}
+          })
+        )
+      }
+    }
+  }
+
+  update(){
+    
+    this.position.x+=this.velosity.x
+    this.position.y+=this.velosity.y
+
+  }
+}
+
+/**
+ * class Player - 
+ */
 
 class Player{
   constructor(){
@@ -45,13 +113,15 @@ class Player{
       y: canvas.height*0.86
     }
 
+    this.rotation =0
+
     const image = new Image()
       image.src = './img/ship2.png'
       image.onload=()=>{
         this.image = image
 
-        this.width = image.width*0.5
-        this.height = image.height*0.5
+        this.width = image.width*coefficient
+        this.height = image.height*coefficient
       }
 
 
@@ -70,14 +140,14 @@ class Player{
         this.position.y, 
         this.width, this.height);
     }
-
-    // c.fillStyle = 'red'
-    // c.fillRect(, this.width, this.height)
   }
 
   update(){
-    this.position.x+=this.velosity.x
-    this.draw()
+    if(this.image){
+      this.position.x+=this.velosity.x
+      this.position.y+=this.velosity.y
+      this.draw()
+    }
   }
 }
 
@@ -109,8 +179,13 @@ class Shot{
 const player = new Player()
 player.draw()
 
+const inv_group = [new GroupInvader()]
+
+
 const shots = [
 ]
+
+
 
 /**  
  * sets by default boolean 'pressed' as false
@@ -143,8 +218,16 @@ function animate(){
   
   c.clearRect(0,0,canvas.width, canvas.height)
   player.update()
+
+  inv_group.forEach(group=>{
+    group.update()
+    group.invaders.forEach((invader)=>{
+      invader.update()
+    })
+  })
+
+
   shots.forEach((shot,index) => {
-    
     if ((shot.position.y+shot.radius)<=0){
       setTimeout(()=>{
         shots.splice(index,1)
@@ -154,25 +237,25 @@ function animate(){
     }
   })
 
+  // if(player.position.x>=0 && (player.position.x+player.width) < canvas.width){
+
+  // }
+
   if(keys.a.pressed && player.position.x >=0){
     player.velosity.x = -speed
   }else if (keys.d.pressed && (player.position.x+player.width) < canvas.width) {
     player.velosity.x = speed
-  }else if(keys.s.pressed){
+  }else if(keys.s.pressed && (player.position.y+player.height+15)<canvas.height){
     player.velosity.y = speed
-  // }else if(keys.s.pressed && (player.position.y+player.height)<canvas.height){
-  //   player.velosity.y = speed
-  }else if(keys.w.pressed){
+  }else if(keys.w.pressed && player.position.y>=0){
     player.velosity.y = -speed
-  // }else if(keys.w.pressed && player.position.y>=0){
-  //   player.velosity.y = -speed
-  }else if (keys.space.pressed) {
-    
   }
   else{
     player.velosity.x=0
     player.velosity.y=0
   }
+
+  // if(count_down>0){ --count_down}
 }
 animate()
 
@@ -194,20 +277,23 @@ addEventListener('keydown', ({key}) =>{
       keys.d.pressed=true
       break;  
     case ' ':
-      shots.push(new Shot({
-        position:{
-          x:player.position.x + player.width/2,
-          y:player.position.y
-        },
-        velosity:{
-          x:0,
-          y:-7
-        }
-      }))
-
-      shotSfx.play()
-
-      keys.space.pressed=true
+      if(count_down==0){
+        shots.push(new Shot({
+          position:{
+            x:player.position.x + player.width/2,
+            y:player.position.y
+          },
+          velosity:{
+            x:0,
+            y:-7
+          }
+        }))
+  
+        shotSfx.play()
+        count_down = 50
+  
+        keys.space.pressed=true
+      }
       break;  
   }
 })

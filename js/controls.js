@@ -56,10 +56,10 @@ class Enemy {
 
   }
 
-  update({velosity}){
+  update(x,y){
     if(this.image){
-      this.position.x+=velosity.x
-      this.position.y+=velosity.y
+      this.position.x+=x
+      this.position.y+=y
       this.draw()
     }
   }
@@ -73,12 +73,15 @@ class GroupInvader{
     }
 
     this.velosity = {
-      x:0,
+      x:2,
       y:0
     }
 
+    
     const rows = Math.floor(Math.random()*5+2)
     const columns = Math.floor(Math.random()*10+4)
+    this.width = columns*47
+    this.height=rows*30
 
     this.invaders =[]
     for(let y=0; y<rows;y++){
@@ -95,10 +98,15 @@ class GroupInvader{
   }
 
   update(){
-    
-    this.position.x+=this.velosity.x
     this.position.y+=this.velosity.y
+    this.position.x+=this.velosity.x
 
+    this.velosity.y=0
+
+    if(this.position.x+this.width>=canvas.width || this.position.x <=0){
+      this.velosity.x= -this.velosity.x
+      this.velosity.y=25.5
+    }
   }
 }
 
@@ -179,13 +187,13 @@ class Shot{
 const player = new Player()
 player.draw()
 
-const inv_group = [new GroupInvader()]
-
+const inv_group = []
 
 const shots = [
 ]
 
-
+let frames = 0
+let randomInterval = Math.floor((Math.random()*3000)+500)
 
 /**  
  * sets by default boolean 'pressed' as false
@@ -218,11 +226,28 @@ function animate(){
   
   c.clearRect(0,0,canvas.width, canvas.height)
   player.update()
-
   inv_group.forEach(group=>{
+    // console.log(group.velosity.x)
     group.update()
-    group.invaders.forEach((invader)=>{
-      invader.update()
+    group.invaders.forEach((invader,i)=>{
+      invader.update(group.velosity.x,group.velosity.y)
+      
+      shots.forEach((shot,index)=>{
+        if((shot.position.y-shot.radius<=invader.position.y+invader.height)&&
+        (shot.position.x+shot.radius>=invader.position.x)&&
+        (shot.position.x-shot.radius<=invader.position.x+invader.width)&&
+        (shot.position.y+shot.radius>=invader.position.y)){
+          setTimeout(()=>{
+            const invaderFound = inv_group.invaders.find(invader2=>invader2===invader)
+            const shotFound = shots.find(shot2=>shot2===shot)
+            if(invaderFound && shotFound){
+              inv_group.invaders.splice(i,1)
+              shots.splice(index,1)
+            }
+          },0)
+
+        }
+      })
     })
   })
 
@@ -255,7 +280,15 @@ function animate(){
     player.velosity.y=0
   }
 
-  // if(count_down>0){ --count_down}
+  console.log(frames)
+
+  if(frames%randomInterval === 0){
+    inv_group.push(new GroupInvader())
+    frames=0
+    randomInterval = Math.floor((Math.random()*3000)+500)
+  }
+
+  frames++
 }
 animate()
 

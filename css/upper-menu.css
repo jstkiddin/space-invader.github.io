@@ -1,3 +1,55 @@
+@font-face {
+  font-family: Mandalore;
+  src: url("./font/MandaloreLaser-x33B8.otf") format("opentype");
+}
+
+@font-face {
+  font-family: Mandalore Title;
+  src: url("./font/MandaloreTitle-lggAe.otf") format("opentype");
+} 
+
+#upper-menu{
+  z-index: 10;
+}
+
+#upper-menu span{
+  font-family: Mandalore;
+  font-size: 1.1em;
+
+  text-align: center;
+  line-height: 20px;
+}
+
+.btn{
+  display: flex;
+  justify-content: end;
+  margin-top: -1.5%; 
+}
+
+#btn-pause, #btn-music{
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+
+  margin-right: 10px;
+
+  border: #fff 2px solid;
+
+  cursor: pointer;
+}
+
+#btn-pause:hover, #btn-music:hover{
+  background-color: rgba(255, 255, 255, 0.63);
+  color: #000;
+}
+
+.clicked{
+  background-color: #fff;
+  color: #000;
+}
+
+
+
 div#upper-menu{
   background-color: #000;
   color: #fff;

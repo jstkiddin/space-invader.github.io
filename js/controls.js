@@ -8,6 +8,12 @@ const music_btn = document.querySelector('#btn-music')
 const pause_btn = document.querySelector('#btn-pause')
 const pause = document.querySelector('.pause')
 
+let player_list
+// '1', {player:{
+// name:
+// score:
+// }}
+
 const game_audio = document.querySelector('#game-audio')
   game_audio.volume=0.3
   game_audio.autoplay=true
@@ -394,6 +400,7 @@ function animate(){
             
             setTimeout(()=>{
               game.active=false
+              savingData()
             },200)
           }
 
@@ -594,4 +601,20 @@ addEventListener('keyup', ({key}) =>{
       break;  
   }
 })
+
+function savingData({player}){
+  const enter_menu = document.querySelector('.enter')
+  const enter_btn = document.querySelector('#enter-btn')
+  enter_menu.classList.add('active')
+
+  enter_btn.addEventListener('click',()=>{
+    
+  })
+  
+    if(player_list.length<5){
+      player_list.setItem(player_list.length+1,player)
+    }else{
+
+    }
+}
 

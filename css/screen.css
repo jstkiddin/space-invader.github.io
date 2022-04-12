@@ -68,10 +68,20 @@ body{
   display: block;
 }
 
+textarea:focus, input:focus {
+  color: #fff;
+}
+
+input, select, textarea{
+  color: #fff;
+}
+
 input[type='text']{
   background: transparent;
   border: none;
   outline: none;
+
+  color:#fff
 
   border-bottom: 1px solid #fff;
 }

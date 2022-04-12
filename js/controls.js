@@ -2,12 +2,13 @@ const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
 const shotSfx = document.querySelector('#shoot')
 
-const speed = 5
-const coefficient = 0.5
-const count_down =0
 /**
  * previous settings
  */
+
+const speed = 5
+const coefficient = 0.5
+const count_down =0
 
 shotSfx.volume = 0.3
 
@@ -63,6 +64,21 @@ class Enemy {
       this.draw()
     }
   }
+
+  shoot(enemyShots){
+    enemyShots.push(new EnemyShot({
+      position:{
+        x: this.position.x+this.width/2,
+        y:this.position.y+this.height
+      },
+      velosity:{
+        x:0,
+        y:5
+      }
+    }
+    ))
+
+  }
 }
 
 class GroupInvader{
@@ -79,7 +95,7 @@ class GroupInvader{
 
     
     const rows = Math.floor(Math.random()*5+2)
-    const columns = Math.floor(Math.random()*10+4)
+    const columns = Math.floor(Math.random()*5+2)
     this.width = columns*47
     this.height=rows*30
 
@@ -108,6 +124,8 @@ class GroupInvader{
       this.velosity.y=25.5
     }
   }
+
+  
 }
 
 /**
@@ -171,7 +189,7 @@ class Shot{
     c.beginPath()
     c.arc(this.position.x, this.position.y,this.radius,0,Math.PI*2)
     
-    c.fillStyle = "white"
+    c.fillStyle = "red"
     c.fill()
     
     c.closePath()
@@ -184,16 +202,40 @@ class Shot{
   }
 }
 
+class EnemyShot{
+  constructor({position,velosity}){
+    this.position = position
+    this.velosity = velosity
+
+    this.width = 3
+    this.height = 10
+  }
+  
+  draw(){
+    c.fillRect(this.position.x, this.position.y, this.width, this.height)
+    c.fillStyle = "red"
+    c.fill()    
+  }
+  
+  update(){
+    this.position.x+=this.velosity.x
+    this.position.y+=this.velosity.y
+    this.draw()
+  }
+
+}
+
 const player = new Player()
 player.draw()
 
-const inv_group = []
+const shots = [] //array of player shots
 
-const shots = [
-]
+const inv_group = [] //array of enemy groups
+const enemyShots = [] //array of enemy shots
 
-let frames = 0
-let randomInterval = Math.floor((Math.random()*3000)+500)
+
+let frames = 0 //frames count to spawn enemyShoots and enemy groups
+let randomInterval = Math.floor((Math.random()*1000)+500) //random number of frames to spawn enemys
 
 /**  
  * sets by default boolean 'pressed' as false
@@ -226,32 +268,22 @@ function animate(){
   
   c.clearRect(0,0,canvas.width, canvas.height)
   player.update()
-  inv_group.forEach(group=>{
-    // console.log(group.velosity.x)
-    group.update()
-    group.invaders.forEach((invader,i)=>{
-      invader.update(group.velosity.x,group.velosity.y)
-      
-      shots.forEach((shot,index)=>{
-        if((shot.position.y-shot.radius<=invader.position.y+invader.height)&&
-        (shot.position.x+shot.radius>=invader.position.x)&&
-        (shot.position.x-shot.radius<=invader.position.x+invader.width)&&
-        (shot.position.y+shot.radius>=invader.position.y)){
-          setTimeout(()=>{
-            const invaderFound = inv_group.invaders.find(invader2=>invader2===invader)
-            const shotFound = shots.find(shot2=>shot2===shot)
-            if(invaderFound && shotFound){
-              inv_group.invaders.splice(i,1)
-              shots.splice(index,1)
-            }
-          },0)
 
-        }
-      })
-    })
+  // console.log(`length of shots array: ${shots.length}`)
+
+  // checking enemy shots going out of game space
+  enemyShots.forEach((enemyShot, esIndex) =>{
+    if(enemyShot.position.y+enemyShot.height >= canvas.height){
+      setTimeout(()=>{
+        enemyShots.splice(esIndex,1)
+
+      },0)
+    }else{
+      enemyShot.update()
+    }
   })
 
-
+  // cheking player shots going out of canvas space
   shots.forEach((shot,index) => {
     if ((shot.position.y+shot.radius)<=0){
       setTimeout(()=>{
@@ -262,14 +294,61 @@ function animate(){
     }
   })
 
-  // if(player.position.x>=0 && (player.position.x+player.width) < canvas.width){
+  // 
+  inv_group.forEach((group,gridIndex)=>{
+    // spawn shots
+    if(frames%100===0 && group.invaders.length>0){
+      randomEI = Math.floor(Math.random()*group.invaders.length)
+      group.invaders[randomEI].shoot(enemyShots)
+    }
+    
+    group.update()
+    group.invaders.forEach((invader,i)=>{
+      invader.update(group.velosity.x,group.velosity.y)
+      
+      shots.forEach((shot,j)=>{
+      
+        // some logic for player shot if it reaches an enemy
+        if((shot.position.y-shot.radius<=invader.position.y+invader.height)&&
+        (shot.position.x+shot.radius>=invader.position.x)&&
+        (shot.position.x-shot.radius<=invader.position.x+invader.width)&&
+        (shot.position.y+shot.radius>=invader.position.y)){
+          setTimeout(()=>{
+            const invaderFound = group.invaders.find(invader2=>invader2===invader)
+            const shotFound = shots.find(shot2=>shot2===shot)
 
-  // }
+            // remove enemy and shot
+            if(invaderFound && shotFound){
+              // debugger;
 
+              group.invaders.splice(i,1)
+              shots.splice(j,1)
+
+              if(group.invaders.length >0){
+                const firstInvader = group.invaders[0]
+                const lastInvader = group.invaders[group.invaders.length-1]
+
+                group.width = lastInvader.position.x-firstInvader.position.x+lastInvader.width
+                group.position.x=firstInvader.position.x
+              }else {
+                group.splice(gridIndex,1)
+              }
+            }
+          },0)
+
+        }
+      })
+    })
+  })
+
+
+  // move player on game space
   if(keys.a.pressed && player.position.x >=0){
     player.velosity.x = -speed
+    player.rotation = -0.15
   }else if (keys.d.pressed && (player.position.x+player.width) < canvas.width) {
     player.velosity.x = speed
+    player.rotation = 0.15
   }else if(keys.s.pressed && (player.position.y+player.height+15)<canvas.height){
     player.velosity.y = speed
   }else if(keys.w.pressed && player.position.y>=0){
@@ -278,18 +357,18 @@ function animate(){
   else{
     player.velosity.x=0
     player.velosity.y=0
+    player.rotation = 0
   }
 
-  console.log(frames)
-
+  // spawn enemy
   if(frames%randomInterval === 0){
     inv_group.push(new GroupInvader())
     frames=0
-    randomInterval = Math.floor((Math.random()*3000)+500)
+    randomInterval = Math.floor((Math.random()*1000)+500)
   }
-
   frames++
 }
+
 animate()
 
 /** 
@@ -310,7 +389,7 @@ addEventListener('keydown', ({key}) =>{
       keys.d.pressed=true
       break;  
     case ' ':
-      if(count_down==0){
+      // if(count_down==0){
         shots.push(new Shot({
           position:{
             x:player.position.x + player.width/2,
@@ -323,10 +402,10 @@ addEventListener('keydown', ({key}) =>{
         }))
   
         shotSfx.play()
-        count_down = 50
+        // count_down = 50
   
         keys.space.pressed=true
-      }
+      // }
       break;  
   }
 })

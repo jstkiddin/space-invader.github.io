@@ -60,6 +60,7 @@ html{
   height: 50px;
   border: 2px solid #fff;
   transition: transform .1s ease-in-out;
+  cursor: pointer;
 }
 
 .btn.m a{
@@ -71,14 +72,11 @@ html{
   text-decoration: none;
 }
 
-.btn{
+/* .btn{
   width: 100px;
   height: 20px;
-
-
   text-align: center;
-  cursor: pointer;
-}
+} */
 
 
 .btn:hover, .btn.m a:hover{

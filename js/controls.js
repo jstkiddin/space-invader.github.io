@@ -1,6 +1,15 @@
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
+const life_html = document.querySelector('#life')
+const points_html = document.querySelector('#points')
 const shotSfx = document.querySelector('#shoot')
+const enemyShotSfx = document.querySelector('#enemy-shoot')
+
+const game_audio = document.querySelector('#game-audio')
+  game_audio.volume=0.3
+  game_audio.autoplay=true
+  game_audio.loop=true
+
 
 /**
  * previous settings
@@ -8,8 +17,9 @@ const shotSfx = document.querySelector('#shoot')
 
 const speed = 5
 const coefficient = 0.5
-const count_down =0
+let count_down = 0
 
+enemyShotSfx.volume = 0.3
 shotSfx.volume = 0.3
 
 canvas.width = innerWidth
@@ -157,6 +167,7 @@ class Player{
     }
 
     this.life = 3
+    this.points = 0
 
   }
 
@@ -177,6 +188,37 @@ class Player{
   }
 }
 
+
+class Particle{
+  constructor({position,velosity,radius,color}){
+    this.position = position
+    this.velosity = velosity
+    this.radius = radius
+    this.color = color
+    this.opacity =1
+  }
+  
+  draw(){
+    c.save()
+    c.globalAlpha = this.opacity
+
+    c.beginPath()
+    c.arc(this.position.x, this.position.y,this.radius,0,Math.PI*2)
+    
+    c.fillStyle = this.color
+    c.fill()
+    
+    c.closePath()
+    c.restore()
+  }
+  
+  update(){
+    this.position.x+=this.velosity.x
+    this.position.y+=this.velosity.y
+    this.opacity-=0.01
+    this.draw()
+  }
+}
 
 class Shot{
   constructor({position,velosity}){
@@ -225,10 +267,13 @@ class EnemyShot{
 
 }
 
+
+// enter
 const player = new Player()
 player.draw()
 
 const shots = [] //array of player shots
+const particles=[]
 
 const inv_group = [] //array of enemy groups
 const enemyShots = [] //array of enemy shots
@@ -267,7 +312,24 @@ function animate(){
   requestAnimationFrame(animate)
   
   c.clearRect(0,0,canvas.width, canvas.height)
+  life.innerHTML = ''
+  life.innerHTML = player.life
+
+  points.innerHTML = ''
+  points.innerHTML = player.points
+
   player.update()
+
+  particles.forEach((particle, pIndex) =>{
+    if(particle.opacity<=0.01){
+      setTimeout(()=>{
+        particles.splice(pIndex,1)
+      },0)
+    }else(
+      particle.update()
+    )
+  })
+
 
   // console.log(`length of shots array: ${shots.length}`)
 
@@ -293,53 +355,78 @@ function animate(){
       shot.update()
     }
   })
+  count_down=0
 
   // 
-  inv_group.forEach((group,gridIndex)=>{
-    // spawn shots
-    if(frames%100===0 && group.invaders.length>0){
-      randomEI = Math.floor(Math.random()*group.invaders.length)
-      group.invaders[randomEI].shoot(enemyShots)
-    }
-    
-    group.update()
-    group.invaders.forEach((invader,i)=>{
-      invader.update(group.velosity.x,group.velosity.y)
+  if(inv_group.length<=0){
+    inv_group.push(new GroupInvader())
+  }else{
+    inv_group.forEach((group,gridIndex)=>{
+      // spawn shots
+      if(frames%200===0 && group.invaders.length>0){
+        randomEI = Math.floor(Math.random()*group.invaders.length)
+        group.invaders[randomEI].shoot(enemyShots)
+        enemyShotSfx.play()
+      }
       
-      shots.forEach((shot,j)=>{
-      
-        // some logic for player shot if it reaches an enemy
-        if((shot.position.y-shot.radius<=invader.position.y+invader.height)&&
-        (shot.position.x+shot.radius>=invader.position.x)&&
-        (shot.position.x-shot.radius<=invader.position.x+invader.width)&&
-        (shot.position.y+shot.radius>=invader.position.y)){
-          setTimeout(()=>{
-            const invaderFound = group.invaders.find(invader2=>invader2===invader)
-            const shotFound = shots.find(shot2=>shot2===shot)
+      group.update()
+      group.invaders.forEach((invader,i)=>{
+        invader.update(group.velosity.x,group.velosity.y)
+        
+        shots.forEach((shot,j)=>{
+        
+          // some logic for player shot if it reaches an enemy
+          if((shot.position.y-shot.radius<=invader.position.y+invader.height)&&
+          (shot.position.x+shot.radius>=invader.position.x)&&
+          (shot.position.x-shot.radius<=invader.position.x+invader.width)&&
+          (shot.position.y+shot.radius>=invader.position.y)){
+            
+            setTimeout(()=>{
+              const invaderFound = group.invaders.find(invader2=>invader2===invader)
+              const shotFound = shots.find(shot2=>shot2===shot)
+  
+              // remove enemy and shot or "ENEMY GOT HITED BY SHOT"
+              if(invaderFound && shotFound){
+                // debugger;
 
-            // remove enemy and shot
-            if(invaderFound && shotFound){
-              // debugger;
-
-              group.invaders.splice(i,1)
-              shots.splice(j,1)
-
-              if(group.invaders.length >0){
-                const firstInvader = group.invaders[0]
-                const lastInvader = group.invaders[group.invaders.length-1]
-
-                group.width = lastInvader.position.x-firstInvader.position.x+lastInvader.width
-                group.position.x=firstInvader.position.x
-              }else {
-                group.splice(gridIndex,1)
+                // EXPLOSIONS EVERYWHERE
+                for(let indexP =0;indexP<10;indexP++){
+                  particles.push(new Particle({position:{
+                    x:invader.position.x+invader.width/2,
+                    y:invader.position.y+invader.height/2,},
+                    velosity:{
+                      x:(Math.random()-0.5)*2,
+                      y:(Math.random()-0.5)*2
+                    },
+                    radius:Math.random()*2,
+                    color:'yellow'
+                }))
+                }
+  
+                // pop the invader and shot from their arrays
+                group.invaders.splice(i,1)
+                shots.splice(j,1)
+                player.points+=50
+  
+                if(group.invaders.length >0){
+                  const firstInvader = group.invaders[0]
+                  const lastInvader = group.invaders[group.invaders.length-1]
+                  // console.log(`first:${firstInvader} and last ${lastInvader}`)
+                  group.width = lastInvader.position.x-firstInvader.position.x+lastInvader.width
+                  group.position.x=firstInvader.position.x
+                }else {
+                  inv_group.splice(gridIndex,1)
+                }
               }
-            }
-          },0)
-
-        }
+            },0)
+  
+          }
+        })
       })
     })
-  })
+  }
+
+  
 
 
   // move player on game space
@@ -361,11 +448,11 @@ function animate(){
   }
 
   // spawn enemy
-  if(frames%randomInterval === 0){
-    inv_group.push(new GroupInvader())
-    frames=0
-    randomInterval = Math.floor((Math.random()*1000)+500)
-  }
+  // if(frames%randomInterval === 0){
+    
+    
+  //   randomInterval = Math.floor((Math.random()*1000)+500)
+  // }
   frames++
 }
 
@@ -389,7 +476,9 @@ addEventListener('keydown', ({key}) =>{
       keys.d.pressed=true
       break;  
     case ' ':
-      // if(count_down==0){
+      count_down=1
+
+      if(count_down===1){
         shots.push(new Shot({
           position:{
             x:player.position.x + player.width/2,
@@ -400,11 +489,12 @@ addEventListener('keydown', ({key}) =>{
             y:-7
           }
         }))
+      }
   
         shotSfx.play()
         // count_down = 50
   
-        keys.space.pressed=true
+        // keys.space.pressed=true
       // }
       break;  
   }
@@ -425,6 +515,8 @@ addEventListener('keyup', ({key}) =>{
       keys.d.pressed=false
       break;  
     case ' ':
+      shotSfx.pause()
+      shotSfx.currentTime = 0
       keys.space.pressed=false
       break;  
   }

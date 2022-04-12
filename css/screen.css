@@ -1,3 +1,13 @@
+@font-face {
+  font-family: Mandalore;
+  src: url("./font/MandaloreLaser-x33B8.otf") format("opentype");
+}
+
+@font-face {
+  font-family: Mandalore Title;
+  src: url("./font/MandaloreTitle-lggAe.otf") format("opentype");
+}  
+
 body{
   margin:0px;
   height: 100%; 
@@ -10,7 +20,7 @@ body{
   color: #fff;
 }
 
-#light{
+/* #light{
   position: absolute;
 
   bottom:-15%;
@@ -25,6 +35,15 @@ body{
   border-top-right-radius: 50%;
 
   filter: blur(200px);
-  /* filter: opacity(10%); */
+  /* filter: opacity(10%); 
   mix-blend-mode: lighten;
+} */
+
+#life, #points{
+  font-family: Mandalore;
+  font-size: 1.1em;
+
+  text-align: center;
+  line-height: 20px;
 }
+

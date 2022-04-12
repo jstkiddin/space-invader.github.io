@@ -1,8 +1,8 @@
 const main_music = document.querySelector('#main-music')
 
-main_music.volume=0.3
-main_music.autoplay=true
-main_music.loop=true
+  main_music.volume=0.3
+  main_music.autoplay=true
+  main_music.loop=true
 
 const menu_btn = document.querySelector(".menu")
 const start_btn = document.querySelector("#start")

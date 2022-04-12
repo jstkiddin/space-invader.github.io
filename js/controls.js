@@ -400,7 +400,7 @@ function animate(){
             
             setTimeout(()=>{
               game.active=false
-              savingData()
+              savingData(player.points)
             },200)
           }
 
@@ -602,17 +602,23 @@ addEventListener('keyup', ({key}) =>{
   }
 })
 
-function savingData({player}){
+function savingData(score){
   const enter_menu = document.querySelector('.enter')
+  const input = document.querySelector('#text-f')
   const enter_btn = document.querySelector('#enter-btn')
+  let new_player={
+    name:'',
+    score:score
+  }
+
   enter_menu.classList.add('active')
 
   enter_btn.addEventListener('click',()=>{
-    
+    new_player.name = input.value
   })
   
     if(player_list.length<5){
-      player_list.setItem(player_list.length+1,player)
+      player_list.setItem(player_list.length+1,new_player)
     }else{
 
     }

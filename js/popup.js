@@ -15,5 +15,4 @@ openPopUp.addEventListener('click', (e)=>{
 closePopUp.addEventListener('click', ()=>{
   popUp.classList.remove('active')
   click_btn.play()
-
 })

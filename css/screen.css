@@ -44,6 +44,8 @@ body{
   display: block;
 }
 
+
+
 .enter{
   display: none;
   background-color: rgba(0, 0, 0, 0.479);
@@ -64,7 +66,7 @@ body{
   z-index: 5;
 }
 
-.enter.active{
+.active{
   display: block;
 }
 
@@ -81,7 +83,7 @@ input[type='text']{
   border: none;
   outline: none;
 
-  color:#fff
+  color:#fff;
 
   border-bottom: 1px solid #fff;
 }
@@ -103,7 +105,30 @@ span#enter-btn:hover{
 
 }
 
+table{
+  display: none;
+  background-color: rgb(0, 0, 0);
+  font-family: 'Mandalore';
+  font-size: 3em;
 
+  width: 80%;
+  height: 80%;
+
+  position: fixed;
+  top:10%;
+  left:10%;
+  color: #fff;
+  text-align: center;
+  /* line-height: 3em; */
+  
+  z-index: 5;
+}
+
+table td, table th{
+  border: 1px solid #fff;
+  width: 20%;
+  height: 10%;
+}
 
 /* #light{
   position: absolute;

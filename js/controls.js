@@ -9,10 +9,7 @@ const pause_btn = document.querySelector('#btn-pause')
 const pause = document.querySelector('.pause')
 
 let player_list
-// '1', {player:{
-// name:
-// score:
-// }}
+
 
 const game_audio = document.querySelector('#game-audio')
   game_audio.volume=0.3
@@ -26,7 +23,7 @@ const game_audio = document.querySelector('#game-audio')
 
 const speed = 5
 const coefficient = 0.5
-let count_down = 0
+// let count_down = 0
 let game = {
   over:false,
   active:true
@@ -104,6 +101,7 @@ class Enemy {
   }
 }
 
+// contains array of invader
 class GroupInvader{
   constructor(){
     this.position ={
@@ -323,7 +321,7 @@ const keys = {
   }
 }
 
-
+//makes explosion animation
 function funExplosion({object,color}){
   for(let indexP =0;indexP<10;indexP++){
     particles.push(new Particle({position:{
@@ -339,7 +337,7 @@ function funExplosion({object,color}){
   }
 }
 
-// 
+//loop for making game active
 function animate(){
   if(game.active){
     requestAnimationFrame(animate)
@@ -485,6 +483,7 @@ function animate(){
 
     // move player on game space
     if(keys.a.pressed && player.position.x >=0){
+      // debugger;
       player.velosity.x = -speed
       player.rotation = -0.15
     }else if (keys.d.pressed && (player.position.x+player.width) < canvas.width) {
@@ -602,25 +601,148 @@ addEventListener('keyup', ({key}) =>{
   }
 })
 
+
+
+
+
+// session storage part
+const enter_menu = document.querySelector('.enter')
+const btn = document.querySelector('#enter-btn')
+const text = document.querySelector('#text-f')
+
+
 function savingData(score){
-  const enter_menu = document.querySelector('.enter')
-  const input = document.querySelector('#text-f')
-  const enter_btn = document.querySelector('#enter-btn')
-  let new_player={
-    name:'',
+  enter_menu.classList.add('active')
+
+  btn.addEventListener('click',()=>{
+    if(text.value.length===0){
+      console.log(`empty`)
+    }else{
+      setNewItem(text.value,score)
+    }
+  })
+
+}
+
+function setNewItem(name,score){
+  let new_player = {
+    name:name,
     score:score
   }
 
-  enter_menu.classList.add('active')
+  let player_arr = []
 
-  enter_btn.addEventListener('click',()=>{
-    new_player.name = input.value
-  })
-  
-    if(player_list.length<5){
-      player_list.setItem(player_list.length+1,new_player)
-    }else{
+  if(!localStorage.users){
+    player_arr.push(new_player)
+    localStorage.setItem('users',JSON.stringify(player_arr))
+  }else{
+      player_arr = JSON.parse(localStorage.users)
+      let player_exist = false
 
-    }
+      if(player_arr !=null){
+        for(let i=0; i<player_arr.length; i++){
+          if(player_arr[i].name == name){
+            player_exist = true
+            if (player_arr[i].score<score){
+              // console.log(typeof player_arr[i].score)
+              player_arr[i].score=score
+              break;
+            }
+          }
+        }
+// debug
+        if(!player_exist){
+          if(player_arr.length<5){
+            player_arr.push(new_player)
+          }else if(player_arr.length===5){
+            let one_player=false
+            for(let i=0; i<player_arr.length; i++){
+              if(!one_player){
+                if (player_arr[i].score<score){
+                  if (i<player_arr.length-1) {
+                    let temp_arr =[]
+                    for(let j = i; j<player_arr.length-1; j++){
+                      temp_arr.push(player_arr[j])
+                    }
+    
+                    player_arr[i].name=name
+                    player_arr[i].score=score
+    
+                    let index = 1
+    
+                    for(let j = 0; j<temp_arr.length; j++){
+                      player_arr[i+index] = temp_arr[j]
+                      index++
+                    }
+                  }else{
+                    player_arr[i].name=name
+                    player_arr[i].score=score
+                  }
+                  
+                  one_player=true
+                  break;
+                }
+              } 
+            }
+          }
+        }  
+
+        player_arr.sort((a,b)=>{
+          if(a.score<b.score){return 1}
+          if(a.score>b.score){return -1}
+          return 0;
+        })
+        
+      //  sort(player_arr)
+       enter_menu.classList.remove('active')
+        localStorage.setItem('users',JSON.stringify(player_arr)) 
+      }
+  }
+
+  getLocalStrorage()
 }
 
+// function sort(arr){
+//   let sorted = false
+//   while(!sorted){
+//     let temp
+//     for(let i=0; i<arr.length-1;i++){
+//       if(arr[i].score<arr[i+1].score){
+//         temp = arr[i+1]
+//         arr[i+1] = arr[i]
+//         arr[i] = temp
+//         sorted = false
+//       } else if(arr[i].score===arr[i+1].score){
+//         if(arr[i].name.toLowerCase()<arr[i+1].name.toLowerCase()){
+//           temp = arr[i+1]
+//           arr[i+1] = arr[i]
+//           arr[i] = temp
+//           sorted = false
+//         }
+//       }else{
+//         sorted = true
+//       }
+//     }
+     
+//   }
+
+// }
+
+function getLocalStrorage(){
+  const table = document.querySelector('table')
+  const tb = document.querySelector('tBody')
+    table.classList.add('active')
+  
+  player_arr = JSON.parse(localStorage.users)
+
+  player_arr.forEach(player =>{
+    let row = tb.insertRow()
+    let name = row.insertCell(0)
+      name.innerHTML = player.name
+      let score = row.insertCell(1)  
+      score.innerHTML = player.score
+  })
+
+  
+
+}

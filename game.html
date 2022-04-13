@@ -7,7 +7,7 @@
   <title>Space Invader</title>
   <link rel="stylesheet" href="css/screen.css">
   <link rel="stylesheet" href="css/upper-menu.css">
-  <link rel="stylesheet" href="css/stars.css">
+  <!-- <link rel="stylesheet" href="css/stars.css"> -->
 </head>
 <body>
   <section class="wrapper">
@@ -36,10 +36,18 @@
   <div class="enter">
     <span>GAME OVER</span><br> 
     <span>Enter your name:</span><br> 
-    <input id="text-f" type="text">
+    <input id="text-f" type="text" min="1" max="10">
     <span id="enter-btn">x</span>  
   </div>
-
+  
+  <table>
+    <tr>
+      <th>Name</th>
+      <th>Score</th>
+    </tr>
+    <tBody></tBody>
+    
+  </table>
   <!-- <div class="list">
   </div> -->
 

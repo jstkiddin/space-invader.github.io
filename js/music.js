@@ -18,7 +18,8 @@ start_btn.addEventListener('mouseover', () => {
  })
 contr_btn.addEventListener('mouseover', () => {
   hover_audio.volume = 0.5
-  hover_audio.play()  
+  hover_audio.play() 
+  main_music.play() 
  })
 
 

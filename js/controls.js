@@ -424,7 +424,7 @@ function animate(){
     }else{
       inv_group.forEach((group,gridIndex)=>{
         // spawn shots
-        if(frames%200===0 && group.invaders.length>0){
+        if(frames%10===0 && group.invaders.length>0){
           randomEI = Math.floor(Math.random()*group.invaders.length)
           group.invaders[randomEI].shoot(enemyShots)
           enemyShotSfx.play()
